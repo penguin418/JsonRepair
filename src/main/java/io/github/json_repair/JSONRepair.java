@@ -4,10 +4,6 @@ package io.github.json_repair;
 import io.github.json_repair.antlr.JSONLexer;
 import io.github.json_repair.antlr.JSONParser;
 import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.misc.Pair;
-
-import java.util.ArrayList;
-import java.util.List;
 
 
 public class JSONRepair {
@@ -28,7 +24,7 @@ public class JSONRepair {
                 parser.json();
             } catch (InputMismatchException e) {
                 Parser recognizer = (Parser) e.getRecognizer();
-                List<Token> mismatched = lexerErrorListener.getMissedCharacters();
+                // List<Token> mismatched = lexerErrorListener.getMissedCharacters();
 
                 Token offendingToken = e.getOffendingToken();
                 Token previousToken = recognizer.getInputStream().LT(-1);
@@ -37,6 +33,12 @@ public class JSONRepair {
                 String offendingText = offendingToken.getText();
                 if ("STRING".equals(previousRule) && "STRING".equals(offendingRule) && offendingText.startsWith("\"")) {
                     jsonString = new StringBuilder(jsonString).insert(previousToken.getStopIndex(), "\\").toString();
+                }
+                else if ("STRING".equals(previousRule) && "NUMBER".equals(offendingRule)) {
+                    jsonString = new StringBuilder(jsonString)
+                            .insert(offendingToken.getStopIndex()+1, "\\")
+                            .insert(offendingToken.getStartIndex()-1, "\\")
+                            .toString();
                 }
                 continue;
             }
